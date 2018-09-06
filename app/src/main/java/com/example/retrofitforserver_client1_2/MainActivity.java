@@ -3,6 +3,7 @@ package com.example.retrofitforserver_client1_2;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,12 +12,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.io.File;
@@ -60,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         verifyStoragePermissions(MainActivity.this);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
+
 
 
         imageView = (ImageView) findViewById(R.id.imageView);
@@ -141,32 +146,41 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 progressDialog.dismiss();
+//                Toast.makeText(MainActivity.this, "Image downloaded successfully!", Toast.LENGTH_LONG);
 
-                InputStream is;
-                FileOutputStream os;
+                if(response.isSuccessful()){
 
-                try {
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyHHmmss");
-                    File newFilePath = new File(Environment.getExternalStorageDirectory() + File.separator + simpleDateFormat.format(new Date()
-                    ) +  "_image.jpg");
+                    InputStream is;
+                    FileOutputStream os;
 
-                    newFilePath.createNewFile();
+                    try {
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyHHmmss");
+                        File newFilePath = new File(Environment.getExternalStorageDirectory() + File.separator + simpleDateFormat.format(new Date()
+                        ) +  "_image.jpg");
 
-                    is = response.body().byteStream();
-                    os = new FileOutputStream(newFilePath);
-                    write(is, os);
+                        newFilePath.createNewFile();
 
-                    is.close();
-                    os.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        is = response.body().byteStream();
+                        os = new FileOutputStream(newFilePath);
+                        write(is, os);
+                        Toast.makeText(MainActivity.this, "Image was downloaded successfully!", Toast.LENGTH_LONG).show();
+
+
+                        is.close();
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else{
+                    Toast.makeText(MainActivity.this, "Image downloading was not successfull =(", Toast.LENGTH_LONG).show();
                 }
-
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 progressDialog.dismiss();
+
+                Toast.makeText(MainActivity.this, "Cannot download image!", Toast.LENGTH_LONG);
             }
         });
     }
@@ -243,8 +257,11 @@ public class MainActivity extends AppCompatActivity {
                     else*/
                     System.out.println("PHOTO: " + response.body().getFileDownloadUri());
                     fileDownloadStr = response.body().getFileName();
+
+                    Toast.makeText(MainActivity.this, "Image was uploaded successfully!", Toast.LENGTH_LONG).show();
                     /*Toast.makeText(getApplicationContext(),response.body().getMessage(),Toast.LENGTH_LONG).show();*/
                 } else {
+                    Toast.makeText(MainActivity.this, "Uploading was not successfull =(", Toast.LENGTH_LONG).show();
                     /*Toast.makeText(getApplicationContext(),response.body().getMessage(),Toast.LENGTH_LONG).show();*/
                 }
 
@@ -256,6 +273,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<Respond> call, Throwable t) {
                 progressDialog.dismiss();
+
+                Toast.makeText(MainActivity.this, "Cannot upload image!", Toast.LENGTH_LONG).show();
             }
         });
     }
